@@ -44,7 +44,7 @@ item_data - number: The damage value, or variation of an item. Defaults to zero.
 return - boolean: True if at least one slot contains the item. That slot is now
 selected.
 --]]
-local function selectItemByName(item_name, item_data=0)
+local function selectItemByName(item_name, item_data)
 	for i=1,16 do
 		local stack = ic.getStackInInternalSlot(i)
 		if (stack ~= nil and stack.name == item_name and stack.damage == item_data) then
@@ -65,7 +65,7 @@ return - nil: If set to be continuous, then if the item cannot be found, then
 the program will exit. If not, it will loop until the item is provided by the 
 user.
 --]]
-local function selectSafely(item_name, item_data=0)
+local function selectSafely(item_name, item_data)
 	local success = selectItemByName(item_name, item_data)
 	if continuous and not success then
 		print("Out of "..item_name..", exiting.")

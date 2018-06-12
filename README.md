@@ -20,10 +20,19 @@ If you would like to help contribute to this collection of scripts, or simply in
 ### Guidelines for Contributing Code
 To promote uniformity and an organized codebase, there are some guidelines to follow when writing scripts for this repository.
 1. All variables and functions should be declared `local` unless required otherwise.
-2. All variables should be defined using underscores. For example, ```lua local my_var = 5```
-3. All function names should be defined using camelCase. For example, ```lua local myFunction()```
+2. All variables should be defined using underscores. For example, 
+```lua
+local my_var = 5
+```
+3. All function names should be defined using camelCase. For example, 
+```lua
+local myFunction()
+```
 4. A multiline comment should appear above all functions, giving a short description of the function, and a list of all parameters, their expected types, and the return type.
-5. Constants should be defined at the top of a file, in all capital characters. For example, ```lua local MY_CONSTANT = 3.14159265```
+5. Constants should be defined at the top of a file, in all capital characters. For example,
+```lua
+local MY_CONSTANT = 3.14159265
+```
 6. All `require` statements should be done at the top of the file, above all other things except the file metadata information.
 7. As stated above, each file should have a metadata section, with the following format:
 ```lua 
@@ -39,5 +48,22 @@ and should be followed for every script in this repository. Note also that
 lines should be manually wrapped at 8 characters, although this is not required
 for actual lines of code.
 --]]
+```
+
+#### Example Function Definition
+```lua
+--[[
+Gets the maximum of two values.
+value_a - number
+value_b - number
+returns - number
+--]]
+local myMax(value_a, value_b)
+    if value_a > value_b then
+        return value_a
+    else
+        return value_b
+    end
+end
 ```
 

@@ -26,10 +26,11 @@ local cyclesPerformed = 0
 Mines one block of cobble, checking for a proper tool first.
 --]]
 local function mineCobble()
-	local success, msg = robot.durability()
-	while not success do
+	local dur = robot.durability()
+	while not dur do
 		print("No valid tool. Please place one in the tool slot and press enter.")
 		io.read()
+		dur = robot.durability()
 	end
 	robot.swing()
 end

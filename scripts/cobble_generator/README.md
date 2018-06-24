@@ -1,12 +1,29 @@
-# TreeFarm.lua
-Robot script for automatic chopping of trees, given a lumber axe, bonemeal, and saplings.
+# cobble_generator.lua
+Robot script for generating cobblestone on a square 4-block generator, as shown below:
+
+```
+Top Layer:
+ OOO				O = Glass
+OLSWO				L = Lava source
+OS SO				W = Water source
+OWSLO				S = Sign
+ OOO				R = Robot
+ 					C = Cobblestone
+ Second layer:
+ OOO
+O C O
+OCRCO
+O C O
+ OOO
+```
+
+The robot will rotate and mine each cobblestone block in sequence, and drop its harvest to the block below it.
 
 ## Pastebin
-[mRTULKY0](https://pastebin.com/mRTULKY0)
+[52ZtDZF1](https://pastebin.com/52ZtDZF1)
 
 ## Module Requirements
-* tractor_beam
-* inventory_controller
+None
 
 ## Instructions
-To operate this program, simply execute it, and it will prompt the user to decide if they wish to choose a number of trees to chop, or `-1` for chopping until out of resources. The robot will stop if its axe has less than 10% durability, it runs out of bonemeal, or runs out of saplings.
+To operate this program, simply execute it, and choose either to run infinitely, or for a set number of cycles. If infinite cycles are chosen, then be sure to check back once in a while, because the tool the robot uses may run out, in which case it will stop until a new tool is added.

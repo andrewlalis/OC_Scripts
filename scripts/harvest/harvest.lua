@@ -213,13 +213,14 @@ local function loadConfig(filename)
 		file:close()
 		return t
 	else
-		print("No config file " .. filename .. "exists. Please create it before continuing.")
+		print("No config file " .. filename .. " exists. Please create it before continuing.")
 		return nil
 	end
 end
 
 --[[
 Guides the user in creating a new config.
+return - table: The config created.
 --]]
 local function createConfig(filename)
 	local config = {}
@@ -239,6 +240,7 @@ local function createConfig(filename)
 	config.COLS = tonumber(io.read())
 
 	print("How many crops are being harvested?")
+	config.crop_definitions = {}
 	for i=1,tonumber(io.read()) do
 		print("Crop "..i..": What is the block name? (Use geolyzer to analyze it)")
 		local name = io.read()
@@ -251,6 +253,7 @@ local function createConfig(filename)
 	file = io.open(filename, "w")
 	file:write(serial.serialize(config))
 	file:close()
+	return config
 end
 
 local function main()
@@ -263,3 +266,5 @@ local function main()
 	local drop_count = dropItems()
 	print(harvest_count..", "..drop_count)
 end
+
+main()

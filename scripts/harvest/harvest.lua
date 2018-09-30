@@ -25,16 +25,7 @@ local LEFT = 1
 local RIGHT = 0
 
 -- List of crops which will be harvested.
-local crop_definitions = {
-	["harvestcraft:pamsoybeancrop"] = {
-		growth_limit = 0.42,
-		item_name = "harvestcraft:soybeanitem"
-	},
-	["harvestcraft:pamspiceleafcrop"] = {
-		growth_limit = 0.42,
-		item_name = "harvestcraft:spiceleafitem"
-	}
-}
+local crop_definitions = {}
 
 -- Repeats the given function until it returns true.
 local function doUntilSuccess(func)
@@ -170,6 +161,7 @@ return - int: The total number of crops harvested.
 local function harvestField(rows, columns, start_location)
 	goToStart(rows, columns)
 	-- Begin harvesting.
+	robot.select(1)
 	local harvests = 0
 	for i=1,rows do
 		harvests = harvests + harvestRow(columns)
@@ -206,16 +198,15 @@ return - table|nil: The table defined in config, or nil if the file does not
 exist or another error occurs.
 --]]
 local function loadConfig(filename)
-	if (fs.exists(filename) and not fs.isDirectory(filename)) then
-		-- Config file exists.
-		file = io.open(filename, "r")
-		local t = serial.unserialize(file:read())
-		file:close()
-		return t
-	else
+	-- Config file exists.
+	local f = io.open(filename, "r")
+	if (f == nil) then
 		print("No config file " .. filename .. " exists. Please create it before continuing.")
 		return nil
 	end
+	local t = serial.unserialize(f:read())
+	f:close()
+	return t
 end
 
 --[[

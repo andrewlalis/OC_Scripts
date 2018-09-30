@@ -7,20 +7,75 @@ Last Modified: 27-09-2018
 Description:
 This library enables string representation of robot movement, for easier
 robotic control without repeating functions many times.
+
+Begin a script with "d_" to tell the robot to attempt to destroy blocks in the
+way of the path of movement.
 --]]
 
 local r = require("robot")
 
 local movescript = {}
 
+local destructive = true
+
+local function doUntilSuccess(f)
+	local success = f()
+	while (not success) do
+		success = f()
+	end
+end
+
+local function up()
+	while (destructive and r.detectUp()) do
+		r.swingUp()
+	end
+	doUntilSuccess(r.up)
+end
+
+local function down()
+	while (destructive and r.detectDown()) do
+		r.swingDown()
+	end
+	doUntilSuccess(r.down)
+end
+
+local function forward()
+	while (destructive and r.detect()) do
+		r.swing()
+	end
+	doUntilSuccess(r.forward)
+end
+
+local function back()
+	if (destructive) then
+		r.turnAround()
+		while (r.detect()) do
+			r.swing()
+		end
+		r.turnAround()
+	end
+	doUntilSuccess(r.back)
+end
+
 local functionMap = {
-	["U"] = r.up,
-	["D"] = r.down,
+	["U"] = up,
+	["D"] = down,
 	["L"] = r.turnLeft,
 	["R"] = r.turnRight,
-	["F"] = r.forward,
-	["B"] = r.back
+	["F"] = forward,
+	["B"] = back,
+	["P"] = r.place,
+	["S"] = r.swing
 }
+
+--[[
+Determines if a string starts with a certain string.
+str - string: The string to check the prefix of.
+start - string: The prefix to look for.
+--]]
+local function starts_with(str, start)
+	return str:sub(1, #start) == start
+end
 
 --[[
 Executes a single instruction once.
@@ -31,10 +86,7 @@ local function executeChar(c)
 	if (f == nil) then
 		return
 	end
-	local success = f()
-	while (not success) do
-		success = f()
-	end
+	f()
 end
 
 --[[
@@ -60,6 +112,12 @@ Executes a given script.
 script - string: The script to execute.
 --]]
 function movescript.execute(script)
+	if (starts_with(script, "d_")) then
+		destructive = true
+		script = string.sub(script, 3)
+	else
+		destructive = false
+	end
 	while (script ~= nil and script ~= "") do
 		-- Matches the next instruction, possibly prefixed by an integer value.
 		local next_instruction = string.match(script, "%d*%u")

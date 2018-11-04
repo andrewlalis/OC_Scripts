@@ -1,12 +1,13 @@
 --[[
 Author: Andrew Lalis
 File: lumber_farm.lua
-Version: 1.0
-Last Modified: 30-09-2018
+Version: 2.0
+Last Modified: 04-11-2018
    
 Description:
-This script will automate the farming of large spruce trees, and manages an
-array of 2x2 trees which it will replant and collect the saplings of.
+This script will automate the farming of large spruce trees, and will chop and
+replant them, but not pick up items, since there are many mod items available
+which can do this more efficiently.
 
 The robot should be given an 'unbreakable' tool with 5 reinforced upgrades.
 --]]
@@ -15,7 +16,6 @@ The robot should be given an 'unbreakable' tool with 5 reinforced upgrades.
 local robot = require("robot")
 local component = require("component")
 local ms = require("movescript")
-local tractor_beam = component.tractor_beam
 local ic = component.inventory_controller
 
 local move_to_start = "5F"
@@ -24,7 +24,6 @@ local return_from_start = "5B"
 local ROWS = 3
 local COLS = 2
 local TREE_SPACING = 3
-local DELAY = 15
 
 -- Global counter.
 local TREES_CHOPPED = 0
@@ -94,39 +93,6 @@ local function isTreeGrown()
 end
 
 --[[
-Uses the tractor_beam module to repeatedly pick up items until there are no 
-more to pick up.
---]]
-local function pickupItems()
-	local success = tractor_beam.suck()
-	while success do
-		success = tractor_beam.suck()
-	end
-end
-
---[[
-Uses the robot's axe to chop a tree, and quits if the lumber axe provided has
-less than 10% durability.
-return - integer: 1 if the tree was chopped, 0 otherwise.
---]]
-local function chopTree()
-	if (isTreeGrown()) then
-		local durability = robot.durability()
-		while (durability == nil) or (durability < 0.1) do
-			print("Please ensure that a lumber axe with at least 10% durability is equipped in the tool slot, and press enter.")
-			io.read()
-			durability = robot.durability()
-		end
-		ms.execute("SF")
-		os.sleep(1)
-		pickupItems()
-		ms.execute("B")
-		return 1
-	end
-	return 0
-end
-
---[[
 Plants a sapling, and if it can't place one at first, loops until it is 
 possible. Assumes the robot is at the starting position:
 OO
@@ -135,11 +101,14 @@ R
 Where O=dirt, R=robot.
 --]]
 local function plantTree()
-	--Pick up any remaining items.
-	pickupItems()
 	local success, str = robot.detect()
 	if (success and (str == "passable" or str == "solid" or str == "replaceable")) then
 		return
+	end
+	local saplings_needed = 4
+	if (getItemCount(SAPLING_NAME, SAPLING_DATA) < saplings_needed) then
+		print("Not enough saplings. Needed: "..saplings_needed..". Add some and press ENTER.")
+		io.read()
 	end
 	selectSafely(SAPLING_NAME, SAPLING_DATA, 1)
 	ms.execute("2FRP")
@@ -149,6 +118,20 @@ local function plantTree()
 	ms.execute("RP")
 	selectSafely(SAPLING_NAME, SAPLING_DATA, 1)
 	ms.execute("LBP")
+end
+
+--[[
+Uses the robot's axe to chop a tree, and quits if the lumber axe provided has
+less than 10% durability.
+return - integer: 1 if the tree was chopped, 0 otherwise.
+--]]
+local function chopTree()
+	if (isTreeGrown()) then
+		ms.execute("S")
+		plantTree()
+		return 1
+	end
+	return 0
 end
 
 --[[
@@ -213,43 +196,21 @@ local function chopOrchard(rows, cols)
 end
 
 --[[
-Collects items from an array of trees.
+Reads any given arguments and uses them for program constants instead of
+default values.
+args - table: the arguments passed to the program.
 --]]
-local function collectItems(rows, cols)
-	doForEachTree(rows, cols, pickupItems)
+local function getSettingsFromArgs(args)
+	ROWS = tonumber(args[1])
+	COLS = tonumber(args[2])
+	TREE_SPACING = tonumber(args[3])
+	move_to_start = args[4]
+	return_from_start = args[5]
 end
 
---[[
-Plants saplings for the array of trees.
---]]
-local function plantSaplings(rows, cols)
-	local saplings_needed = TREES_CHOPPED * 4
-	if (getItemCount(SAPLING_NAME, SAPLING_DATA) < saplings_needed) then
-		print("Not enough saplings. Needed: "..saplings_needed..". Add some and press ENTER.")
-		io.read()
-	end
-	doForEachTree(rows, cols, plantTree)
-	TREES_CHOPPED = 0
-end
-
---[[
-Deposits all items into a chest below the robot.
---]]
-local function depositItems()
-	for i=1,16 do
-		robot.select(i)
-		robot.dropDown()
-	end
-	robot.select(1)
+local args = {...}
+if (#args == 5) then
+	getSettingsFromArgs(args)
 end
 
 chopOrchard(ROWS, COLS)
-depositItems()
-print("Orchard chopped. Waiting 2.5 min before collecting saplings...")
-for i=1,(DELAY) do
-	os.sleep(10)
-	print(i*10)
-end
-collectItems(ROWS, COLS)
-plantSaplings(ROWS, COLS)
-depositItems()

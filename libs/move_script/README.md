@@ -8,7 +8,7 @@ A more convenient way to move a robot.
 *None*
 
 ## Instructions
-Simply run `pastebin get 4c2AN8Jw /lib/movescript` to install movescript to the local computer. Then you can begin writing movescripts to tell your robots how to move. For example:
+Simply run `pastebin get 4c2AN8Jw /lib/movescript.lua` to install movescript to the local computer. Then you can begin writing movescripts to tell your robots how to move. For example:
 
 ```
 local ms = require("movescript")
